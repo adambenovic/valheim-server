@@ -1,0 +1,30 @@
+services:
+  valheim:
+    image: ghcr.io/lloesche/valheim-server
+    cap_add:
+      - sys_nice
+    volumes:
+      - $HOME/projects/valheim-server/config:/config
+      - $HOME/projects/valheim-server/data:/opt/valheim
+    ports:
+      - "2456-2458:2456-2458/udp"
+      - "9001:9001/tcp"
+    env_file:
+      - $HOME/projects/valheim-server/valheim.env
+    restart: always
+    stop_grace_period: 2m
+    networks:
+      - valheim
+  valheim-status:
+    build: $HOME/projects/valheim-server/status
+    working_dir: /app
+    volumes:
+      - $HOME/projects/valheim-server/status:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["node", "index.js"]
+    restart: always
+    networks:
+      - valheim
+
+networks:
+  valheim:

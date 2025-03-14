@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Valheim Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#b7410e">
+    <link href="norse.otf" rel="stylesheet" type="text/css"/>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<script>
+    const BASE_URL = 'http://localhost:3000';
+    setInterval(refreshStatus, 5000);
+    refreshStatus();
+
+    function refreshStatus() {
+        fetch(`${BASE_URL}/status`)
+            .then(response => response.text())
+            .then(data => {
+                const element = document.getElementById('server-status');
+                element.classList.remove('offline');
+                element.classList.remove('shutting-down');
+                element.classList.remove('online');
+                element.classList.remove('unknown');
+
+                if (data === 'shutting-down') {
+                    element.innerText = 'Shutting Down';
+                    element.classList.add('shutting-down');
+                } else if (data === 'offline') {
+                    element.innerText = 'Offline';
+                    element.classList.add('offline');
+                } else if (data) {
+                    element.innerText = data;
+                    element.classList.add('online');
+                } else {
+                    element.innerText = 'Unknown';
+                    element.classList.add('unknown');
+                }
+            });
+        fetch(`${BASE_URL}/players`)
+            .then(response => response.text())
+            .then(data => document.getElementById('player-count').innerText = data);
+        fetch(`${BASE_URL}/version`)
+            .then(response => response.text())
+            .then(data => document.getElementById('game-version').innerText = data);
+    }
+
+    function startServer() {
+        fetch(`${BASE_URL}/start`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+                console.log(`Start: ${data}`);
+                refreshStatus();
+            });
+
+        document.getElementById('start-button').setAttribute("disabled", "disabled");
+        setTimeout(() => { document.getElementById('start-button').removeAttribute("disabled"); }, 3000);
+    }
+
+    function stopServer() {
+        fetch(`${BASE_URL}/stop`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+                console.log(`Stop: ${data}`);
+                setTimeout(() => { refreshStatus(); }, 1000);
+            });
+
+        document.getElementById('stop-button').setAttribute("disabled", "disabled");
+        setTimeout(() => { document.getElementById('stop-button').removeAttribute("disabled"); }, 3000);
+    }
+</script>
+<style>
+    @font-face {
+        font-family: Norse;
+        src: url("norse.otf") format("opentype");
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        font-family: "Norse", serif;
+        color: white;
+    }
+
+    body {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("background.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .fancy-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: white;
+        font-size: 2.2em;
+        font-weight: bold;
+        padding: 0.5em;
+        text-decoration: underline 0.15em rgba(0, 0, 0, 0);
+        text-underline-offset: 0.1em;
+        text-decoration-thickness: 0.1em;
+        transition: text-decoration-color 300ms;
+    }
+
+    .fancy-button:hover {
+        text-decoration-color: rgb(255, 255, 255, 1);
+    }
+
+    .fancy-button[disabled], .fancy-button[disabled]:hover {
+        pointer-events: none;
+        color: darkgray;
+    }
+
+    #server-status {
+        font-size: 5em;
+        text-transform: uppercase;
+    }
+
+    #online-players {
+        margin-top: 0.5em;
+        margin-bottom: 1.2em;
+        font-size: 2em;
+    }
+
+    #version {
+        margin-top: 0.5em;
+        font-size: 1.6em;
+    }
+
+    .mods a {
+        font-size: 1.3em;
+    }
+
+    #mods-header {
+        font-size: 1.6em;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+    }
+
+    .container {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .center > * {
+        text-align: center;
+    }
+
+    .download-link {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+    .download-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .unknown {
+        color: gray;
+    }
+
+    .offline {
+        color: red;
+    }
+
+    .shutting-down {
+        color: yellow;
+    }
+
+    .online {
+        color: green;
+    }
+</style>
+<body>
+<main class="container">
+    <section class="center">
+        <h1 class="unknown" id="server-status">N/A</h1>
+        <h4 id="version">Version: <span id="game-version">N/A</span></h4>
+        <h3 id="online-players">Online players: <span id="player-count">N/A</span></h3>
+        <div>
+            <button id="start-button" class="fancy-button" onclick="startServer();return false;">Start server</button>
+            <button id="stop-button" class="fancy-button" onclick="stopServer();return false;">Stop server</button>
+        </div>
+        <section class="mods">
+            <h4 id="mods-header">Installed mods</h4>
+            <div>
+                <a href="https://github.com/Grantapher/ValheimPlus" target="_blank">ValheimPLUS (Grantapher) 0.9.9.13</a>
+            </div>
+            <div>
+                <a href="https://www.nexusmods.com/valheim/mods/1138" target="_blank">Jotunn the Valheim Library 2.11.2</a>
+            </div>
+            <div>
+                <a href="https://www.nexusmods.com/valheim/mods/1136" target="_blank">ValheimRAFT 1.4.7</a>
+            </div>
+            <div>
+                <a href="https://www.nexusmods.com/valheim/mods/170" target="_blank">AnyPortal 2.0.0</a>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>
