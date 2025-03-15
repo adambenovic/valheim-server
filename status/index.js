@@ -10,7 +10,7 @@ let shuttingDown = false;
 
 // Enable CORS
 app.use(cors({
-    origin: ['https://valheim.benocode.sk', 'http://localhost']
+    origin: [process.env.ORIGIN]
 }));
 
 // Serve static files (HTML, CSS, JS)
@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API endpoint to check Valheim server status
 app.get('/status', async (req, res) => {
-    exec("docker ps -f name=valheim --format '{{.Status}}'", (error, stdout, stderr) => {
+    exec("docker ps -f name=valheim-server-valheim-1 --format '{{.Status}}'", (error, stdout, stderr) => {
         const output = stdout.trim();
         if (output && output.length > 0) {
             if (shuttingDown) {
@@ -34,7 +34,7 @@ app.get('/status', async (req, res) => {
 
 // API endpoint to get player count
 app.get('/players', async (req, res) => {
-    Gamedig.query({
+    Gamedig.GameDig.query({
         type: 'valheim',
         host: 'valheim',
     }).then(state => {
@@ -47,12 +47,12 @@ app.get('/players', async (req, res) => {
 
 // API endpoint to get server version
 app.get('/version', async (req, res) => {
-    Gamedig.query({
+    Gamedig.GameDig.query({
         type: 'valheim',
         host: 'valheim',
     }).then(state => {
-        if (state.raw.tags && state.raw.tags.length === 1) {
-            res.send(state.raw.tags[0].trim());
+        if (state.raw.tags) {
+            res.send(state.raw.tags[0].trim().replace("g=", ""));
         } else {
             res.send("Unknown");
         }
@@ -64,7 +64,7 @@ app.get('/version', async (req, res) => {
 
 // API endpoint to start Valheim server
 app.post('/start', async (req, res) => {
-    exec('docker compose up -d', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
+    exec('docker compose start valheim', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error}`);
             res.send('0');
@@ -77,7 +77,7 @@ app.post('/start', async (req, res) => {
 // API endpoint to stop Valheim server
 app.post('/stop', async (req, res) => {
     shuttingDown = true;
-    exec('docker compose down', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
+    exec('docker compose stop valheim', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
         shuttingDown = false;
         if (error) {
             console.log(`error: ${error}`);

@@ -4,23 +4,27 @@ services:
     cap_add:
       - sys_nice
     volumes:
-      - $HOME/projects/valheim-server/config:/config
-      - $HOME/projects/valheim-server/data:/opt/valheim
+      - ${FILE_PATH}/config:/config
+      - ${FILE_PATH}/data:/opt/valheim
     ports:
       - "2456-2458:2456-2458/udp"
       - "9001:9001/tcp"
     env_file:
-      - $HOME/projects/valheim-server/valheim.env
+      - ${FILE_PATH}/valheim.env
     restart: always
     stop_grace_period: 2m
     networks:
       - valheim
   valheim-status:
-    build: $HOME/projects/valheim-server/status
+    build: ${FILE_PATH}/status
     working_dir: /app
     volumes:
-      - $HOME/projects/valheim-server/status:/app
+      - ${FILE_PATH}/status:/app
+      - ${FILE_PATH}:/opt/valheim
       - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - ${NODE_PORT}:${NODE_PORT}
+    privileged: true
     command: ["node", "index.js"]
     restart: always
     networks:

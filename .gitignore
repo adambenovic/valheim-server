@@ -1,0 +1,17 @@
+config/backups
+config/worlds_local
+data/
+
+status/node_modules
+
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+status/.env.development.local
+status/.env.test.local
+status/.env.production.local
+status/.env.local
+
+.vscode
