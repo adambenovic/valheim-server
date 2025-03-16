@@ -24,7 +24,7 @@ Stop it:
 ## Installed mods & required by clients
 
 - [BepInEx](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/)
-- [ValheimPLUS v0.9.9.11](https://www.nexusmods.com/valheim/mods/4)
+- [ValheimPLUS v0.9.16.2](https://www.nexusmods.com/valheim/mods/2323)
 - [Jotunn the Valheim Library v2.24.3](https://www.nexusmods.com/valheim/mods/1138)
 - [ValheimRAFT - Continued v3.0.5](https://www.nexusmods.com/valheim/mods/2630)
 - [XPortal v1.2.22](https://www.nexusmods.com/valheim/mods/2239)
