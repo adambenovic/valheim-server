@@ -14,11 +14,17 @@ app.use(cors({
 }));
 
 // Serve static files (HTML, CSS, JS)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.otf')) {
+            res.setHeader('Content-Type', 'font/otf');
+        }
+    }
+}));
 
 // API endpoint to check Valheim server status
 app.get('/status', async (req, res) => {
-    exec("docker ps -f name=valheim-server-valheim-1 --format '{{.Status}}'", (error, stdout, stderr) => {
+    exec("docker ps -f name=valheim-valheim-1 --format '{{.Status}}'", (error, stdout, stderr) => {
         const output = stdout.trim();
         if (output && output.length > 0) {
             if (shuttingDown) {
@@ -64,7 +70,7 @@ app.get('/version', async (req, res) => {
 
 // API endpoint to start Valheim server
 app.post('/start', async (req, res) => {
-    exec('docker compose start valheim', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
+    exec('docker compose --project-name valheim start valheim', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error}`);
             res.send('0');
@@ -77,7 +83,7 @@ app.post('/start', async (req, res) => {
 // API endpoint to stop Valheim server
 app.post('/stop', async (req, res) => {
     shuttingDown = true;
-    exec('docker compose stop valheim', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
+    exec('docker compose --project-name valheim stop valheim', { cwd: '/opt/valheim' }, (error, stdout, stderr) => {
         shuttingDown = false;
         if (error) {
             console.log(`error: ${error}`);
