@@ -1,6 +1,7 @@
 config/backups
 config/worlds_local
-data/
+data/*
+!data/.gitkeep
 
 status/node_modules
 
